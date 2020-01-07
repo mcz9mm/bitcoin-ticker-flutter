@@ -34,10 +34,9 @@ const List<String> cryptoList = [
 
 class CoinData {
 
-  Future<dynamic> getLastUSDPrice() async {
+  Future<dynamic> getLastUSDPrice(String currency) async {
 
-    String usd = 'USD';
-    NetworkHelper networkHelper = NetworkHelper('$bitcoinURL$usd');
+    NetworkHelper networkHelper = NetworkHelper('$bitcoinURL$currency');
     var bitcoinData = await networkHelper.getData();
     return bitcoinData;
   }

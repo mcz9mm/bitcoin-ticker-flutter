@@ -35,6 +35,7 @@ class _PriceScreenState extends State<PriceScreen> {
         print(value);
         setState(() {
           selectedCurrency = value;
+          getLastPrice();
         });
       },
     );
@@ -54,6 +55,8 @@ class _PriceScreenState extends State<PriceScreen> {
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         print(selectedIndex);
+        selectedCurrency = currenciesList[selectedIndex];
+        getLastPrice();
       },
       children: pickerItems,
     );
@@ -81,7 +84,7 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void getLastPrice() async {
 
-    var data = await coinData.getLastUSDPrice();
+    var data = await coinData.getLastUSDPrice(selectedCurrency);
     if (data != null) {
       updateUI(data);
     }
