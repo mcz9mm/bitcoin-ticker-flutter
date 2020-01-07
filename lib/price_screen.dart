@@ -10,8 +10,9 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
 
-  String selectedCurrency = 'USD';
-  String currencyPrice = '?';
+  String selectedCurrency = 'AUD';
+  bool isWaiting = true;
+  Map<String, String> coinValues = {};
 
   CoinData coinData = CoinData();
 
@@ -62,15 +63,15 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  void updateUI(dynamic bitcoinData) {
+  void updateUI(dynamic pricesData) {
 
     setState(() {
 
-      if (bitcoinData != null) {
-        double lastPrice = bitcoinData['last'];
-        currencyPrice = lastPrice.toInt().toString();
+      if (pricesData != null) {
+        isWaiting = false;
+        coinValues = pricesData;
       } else {
-        currencyPrice = 'Error';
+        print('ERROR');
       }
     });
   }
@@ -84,7 +85,11 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void getLastPrice() async {
 
-    var data = await coinData.getLastUSDPrice(selectedCurrency);
+    setState(() {
+      isWaiting = true;
+    });
+
+    var data = await coinData.getLastPrice(selectedCurrency);
     if (data != null) {
       updateUI(data);
     }
@@ -100,26 +105,34 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $currencyPrice $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+                child: CryptoCard(
+                  crypto: 'BTC',
+                  price: isWaiting ? '?' : coinValues['BTC'],
+                  selectedCurrency: selectedCurrency,
                 ),
               ),
-            ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+                child: CryptoCard(
+                  crypto: 'ETH',
+                  price: isWaiting ? '?' : coinValues['ETH'],
+                  selectedCurrency: selectedCurrency,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+                child: CryptoCard(
+                  crypto: 'LTC',
+                  price: isWaiting ? '?' : coinValues['LTC'],
+                  selectedCurrency: selectedCurrency,
+                ),
+              ),
+            ],
           ),
           Container(
             height: 150.0,
@@ -133,3 +146,40 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 }
+
+
+class CryptoCard extends StatelessWidget {
+
+  CryptoCard({
+    this.crypto,
+    this.price,
+    this.selectedCurrency,
+  });
+
+  final String price;
+  final String crypto;
+  final String selectedCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.lightBlueAccent,
+      elevation: 5.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+        child: Text(
+          '1 $crypto = $price $selectedCurrency',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 20.0,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
